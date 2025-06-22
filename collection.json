@@ -1,67 +1,56 @@
 {
   "info": {
+    "_postman_id": "c0f8a7b5-7e3a-4a5d-9e2b-1c3d4e5f6a7b",
     "name": "BookBazaar API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_postman_id": "bookbazaar-collection"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Auth & API Key",
+      "name": "Auth",
       "item": [
         {
           "name": "Register User",
           "request": {
             "method": "POST",
             "header": [],
-            "url": {
-              "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Login User",
           "request": {
             "method": "POST",
             "header": [],
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "let json = pm.response.json();",
-                  "pm.environment.set(\"token\", json.token);",
-                  "pm.environment.set(\"user_id\", json.user.id);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Generate API Key",
@@ -70,8 +59,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
+                "value": "Bearer {{user_jwt}}"
               }
             ],
             "url": {
@@ -80,27 +68,16 @@
               "path": ["auth", "api-key"]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.environment.set(\"api_key\", pm.response.json().apiKey);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+          "response": []
         },
         {
-          "name": "Get My Profile",
+          "name": "Get User Profile",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
+                "value": "Bearer {{user_jwt}}"
               }
             ],
             "url": {
@@ -108,7 +85,8 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "me"]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -116,86 +94,126 @@
       "name": "Books",
       "item": [
         {
-          "name": "Add Book (Admin Only)",
+          "name": "Create Book (Admin)",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" },
-              { "key": "Content-Type", "value": "application/json", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt}}"
+              }
             ],
-            "url": {
-              "raw": "{{base_url}}/books",
-              "host": ["{{base_url}}"],
-              "path": ["books"]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Atomic Habits\",\n  \"author\": \"James Clear\",\n  \"genre\": \"Self-help\",\n  \"price\": 15.99,\n  \"stock\": 50\n}"
-            }
-          }
-        },
-        {
-          "name": "Get All Books",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
-            ],
+              "raw": "{\n    \"title\": \"The Great Gatsby\",\n    \"author\": \"F. Scott Fitzgerald\",\n    \"genre\": \"Classic\",\n    \"price\": 12.99,\n    \"stock\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{base_url}}/books",
               "host": ["{{base_url}}"],
               "path": ["books"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Book by ID",
+          "name": "List All Books (API Key)",
           "request": {
             "method": "GET",
             "header": [
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books?genre=Classic&minPrice=10&maxPrice=20",
+              "host": ["{{base_url}}"],
+              "path": ["books"],
+              "query": [
+                {
+                  "key": "genre",
+                  "value": "Classic"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "10"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/books/{{book_id}}",
               "host": ["{{base_url}}"],
               "path": ["books", "{{book_id}}"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Update Book",
+          "name": "Update Book (Admin)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt}}"
+              }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 14.99,\n    \"stock\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{base_url}}/books/{{book_id}}",
               "host": ["{{base_url}}"],
               "path": ["books", "{{book_id}}"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"price\": 18.99\n}"
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Delete Book",
+          "name": "Delete Book (Admin)",
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/books/{{book_id}}",
               "host": ["{{base_url}}"],
               "path": ["books", "{{book_id}}"]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -203,47 +221,67 @@
       "name": "Reviews",
       "item": [
         {
-          "name": "Add Review to Book",
+          "name": "Add Review",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"rating\": 5,\n    \"comment\": \"Amazing book!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{book_id}}", "reviews"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Reviews for Book",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/books/{{book_id}}/reviews",
               "host": ["{{base_url}}"],
               "path": ["books", "{{book_id}}", "reviews"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Life-changing book!\"\n}"
             }
-          }
-        },
-        {
-          "name": "Get Reviews for Book",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/books/{{book_id}}/reviews",
-              "host": ["{{base_url}}"],
-              "path": ["books", "{{book_id}}", "reviews"]
-            }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Review",
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/reviews/{{review_id}}",
               "host": ["{{base_url}}"],
               "path": ["reviews", "{{review_id}}"]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -255,51 +293,285 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
             ],
-            "url": {
-              "raw": "{{base_url}}/orders",
-              "host": ["{{base_url}}"],
-              "path": ["orders"]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    { \"bookId\": \"{{book_id}}\", \"quantity\": 1 }\n  ]\n}"
+              "raw": "{\n    \"items\": [\n        {\n            \"bookId\": {{book_id}},\n            \"quantity\": 2\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get My Orders",
+          "name": "List User's Orders",
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/orders",
               "host": ["{{base_url}}"],
               "path": ["orders"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Order by ID",
+          "name": "Get Order Details",
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
-              { "key": "x-api-key", "value": "{{api_key}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/orders/{{order_id}}",
               "host": ["{{base_url}}"],
               "path": ["orders", "{{order_id}}"]
             }
-          }
+          },
+          "response": []
         }
       ]
+    },
+    {
+      "name": "Payments (Bonus)",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"orderId\": \"{{order_id}}\",\n    \"amount\": 29.98\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/create",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"paymentId\": \"{{payment_id}}\",\n    \"orderId\": \"{{order_id}}\",\n    \"signature\": \"generated_signature_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/verify",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "verify"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart (Bonus)",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bookId\": {{book_id}},\n    \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": ["{{base_url}}"],
+              "path": ["cart"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": ["{{base_url}}"],
+              "path": ["cart"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_jwt}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "admin_jwt",
+      "value": "admin_jwt_token_here"
+    },
+    {
+      "key": "user_jwt",
+      "value": "user_jwt_token_here"
+    },
+    {
+      "key": "api_key",
+      "value": "generated_api_key_here"
+    },
+    {
+      "key": "book_id",
+      "value": "1"
+    },
+    {
+      "key": "review_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    },
+    {
+      "key": "payment_id",
+      "value": "pay_123456789"
+    },
+    {
+      "key": "cart_item_id",
+      "value": "1"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set environment variables if needed"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Test scripts for response validation",
+          "pm.test(\"Status code is 200\", function () {",
+          "    pm.response.to.have.status(200);",
+          "});",
+          "",
+          "pm.test(\"Response has valid data\", function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.be.an('object');",
+          "});"
+        ]
+      }
     }
   ]
 }
